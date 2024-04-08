@@ -7,7 +7,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QDialog, QMessageBox, QLineEdit
 from PyQt5.QtCore import Qt
 from untitled import Ui_Dialog
 
@@ -42,8 +42,16 @@ class loginDialog(QDialog):
 
         if not os.path.exists('data'):
             os.mkdir('data')
+        # self.clearFocus()
+        # self.ui.userNameEdit.setFocus()
+        self.ui.loginButton.clicked.connect(self.check)
+        self.ui.loginMiniButton.clicked.connect(self.showMinimized)
+        self.ui.loginCloseButton.clicked.connect(self.close)
+        self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
 
-        self.loginButton.clicked.connect(self.check)
+
+    def really(self):
+        QMessageBox.information(self, 'ha', 'he')
 
     def check(self):
         filepath = 'data/userInfo'
@@ -60,18 +68,18 @@ class loginDialog(QDialog):
         #     userFile.flush()
         #     userFile.close()
         # else:
-        userInput_Name = self.userNameEdit.text()
-        userInput_Password = self.passwordEdit.text()
+        userInput_Name = self.ui.userNameEdit.text()
+        userInput_Password = self.ui.passwordEdit.text()
         userFile = open(filepath, 'rb')
         userInfo = userFile.read().decode('utf-8')
         userFile.close()
         userInfo = func_decrypt_config(key, userInfo)
         if self.check_credentials(userInfo, userInput_Name, userInput_Password):
             print('登录成功!')
-            QMessageBox.information(self, text='登陆成功!')
+            QMessageBox.information(self, 'Congratulation!', '登陆成功!')
         else:
             print('登录失败!')
-            QMessageBox.information(self, text='登陆失败!')
+            QMessageBox.information(self, 'Pity!', '登陆失败!')
 
     def check_credentials(self, userinfo, userinput_name, userinput_password):
         lines = userinfo.splitlines()
@@ -87,6 +95,7 @@ class loginDialog(QDialog):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     login = loginDialog()
+    login.setWindowFlag(Qt.FramelessWindowHint)
     login.show()
     # dialog = QDialog()
     # dialog.setWindowFlag(Qt.FramelessWindowHint)      # 去除标题栏

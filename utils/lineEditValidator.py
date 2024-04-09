@@ -75,7 +75,7 @@ class LineEditValidator(QtGui.QValidator):
 
             # lineEdit.selectAll()
             QtCore.QTimer.singleShot(0, lineEdit.selectAll)  # 0ms
-            self.fixupString = lineEdit.text()
+            # self.fixupString = lineEdit.text()
 
             # print(self.fixupString)
             # return False so that the lineEdit will also handle the event

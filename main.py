@@ -21,14 +21,13 @@ filepath = 'data/userInfo/users.dat'
 class registerDialog(QDialog):
     ui = Ui_newUserDialog()
     userNameValidator = LineEditValidator(
-        fullPatterns=[r'^[a-zA-Z0-9]{6,12}$'],
-        partialPatterns=[r'^[a-zA-Z0-9]{1,12}$'],
-        fixupString='what'
-        # fixupString=None
+        fullPatterns=['', r'^[a-zA-Z0-9]{6,12}$'],
+        partialPatterns=['', r'^[a-zA-Z0-9]{1,12}$'],
+        fixupString=''
     )
     userPasswordValidator = LineEditValidator(
-        fullPatterns=[r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z0-9]{8,16}$'],
-        partialPatterns=[r'^[a-zA-Z0-9]{1,16}$'],
+        fullPatterns=['', r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z0-9]{8,16}$'],
+        partialPatterns=['', r'^[a-zA-Z0-9]{1,16}$'],
         fixupString=''
     )
 
@@ -37,15 +36,18 @@ class registerDialog(QDialog):
         self.ui.setupUi(self)
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.ui.regisMiniButton.clicked.connect(self.showMinimized)
-        self.ui.regisCloseButton.clicked.connect(self.close)    # 这里要设置让后面的东西别出来了
+        self.ui.regisCloseButton.clicked.connect(QApplication.instance().quit)  # 这里要设置让后面的东西别出来了
         self.ui.userNameEdit.setValidator(self.userNameValidator)
         self.ui.userNameEdit.installEventFilter(self.userNameValidator)
+        self.ui.userNameEdit.setPlaceholderText('6-12个英文/数字组合')
         self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
         self.ui.passwordEdit.setValidator(self.userPasswordValidator)
         self.ui.passwordEdit.installEventFilter(self.userPasswordValidator)
+        self.ui.passwordEdit.setPlaceholderText('8-16个英文/数字组合(至少一个英文大小写加数字)')
         self.ui.passwordConfirmEdit.setValidator(self.userPasswordValidator)
         self.ui.passwordConfirmEdit.installEventFilter(self.userPasswordValidator)
         self.ui.passwordConfirmEdit.setEchoMode(QLineEdit.Password)
+        self.ui.passwordConfirmEdit.setPlaceholderText('与第一次的输入保持一致')
         self.ui.registerButton.clicked.connect(self.register)
         QMessageBox.information(self, '', '首次登录，请先创建用户!')
 
@@ -53,6 +55,10 @@ class registerDialog(QDialog):
         userInput_Name = self.ui.userNameEdit.text()
         userInput_Password = self.ui.passwordEdit.text()
         userInput_PasswordConfirm = self.ui.passwordConfirmEdit.text()
+        if len(userInput_Name) == 0 or len(userInput_Password) == 0 or len(userInput_PasswordConfirm) == 0:
+            QMessageBox.information(self, '', '用户名/密码不能为空!')
+            self.ui.userNameEdit.setFocus()
+            return
         if userInput_Password != userInput_PasswordConfirm:
             QMessageBox.information(self, '', '两次输入的密码不一致!')
             self.ui.passwordEdit.clear()
@@ -74,9 +80,6 @@ class registerDialog(QDialog):
         msgBox.exec_()
         self.close()
 
-    # def checkUserName(self):
-    #     userName = self.ui.userNameEdit.text()
-    #     if()
 
 class loginDialog(QDialog):
     ui = Ui_Dialog()
@@ -87,7 +90,7 @@ class loginDialog(QDialog):
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.ui.loginButton.clicked.connect(self.check)
         self.ui.loginMiniButton.clicked.connect(self.showMinimized)
-        self.ui.loginCloseButton.clicked.connect(self.close)
+        self.ui.loginCloseButton.clicked.connect(QApplication.instance().quit)
         self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
 
     def check(self):
@@ -117,11 +120,11 @@ class loginDialog(QDialog):
         if len(lines) % 2 != 0:
             raise SystemExit('UserFileError!')
         for i in userNum:
-            if lines[i] == userinput_name and lines[i + 1] == userinput_password:       # 匹配成功
+            if lines[i] == userinput_name and lines[i + 1] == userinput_password:  # 匹配成功
                 return 1
-            elif lines[i] == userinput_name and lines[i + 1] != userinput_password:     # 密码错误
+            elif lines[i] == userinput_name and lines[i + 1] != userinput_password:  # 密码错误
                 return 2
-            else:                                                                       # 账号错误
+            else:  # 账号错误
                 return 3
         return 0
 
@@ -148,7 +151,6 @@ class Controller:
         self.logDialog = loginDialog()
         self.logDialog.setFixedSize(378, 440)
         self.logDialog.show()
-
 
 
 if __name__ == '__main__':

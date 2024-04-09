@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt
 from untitled import Ui_Dialog
 from newUser import Ui_Dialog as Ui_newUserDialog
 
+QtCore.QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 key = b'mysecretpassword'  # 密钥（需要确保安全）
 
 
@@ -48,12 +49,6 @@ class loginDialog(QDialog):
         super().__init__(parent)
         self.ui.setupUi(self)
         self.setWindowFlag(Qt.FramelessWindowHint)
-        # self.newUserUi.setupUi(self)
-
-        # if not os.path.exists('data'):
-        #     os.mkdir('data')
-        # self.clearFocus()
-        # self.ui.userNameEdit.setFocus()
         self.ui.loginButton.clicked.connect(self.check)
         self.ui.loginMiniButton.clicked.connect(self.showMinimized)
         self.ui.loginCloseButton.clicked.connect(self.close)
@@ -61,19 +56,7 @@ class loginDialog(QDialog):
 
     def check(self):
         filepath = 'data/userInfo'
-        # if not os.path.exists(filepath):
-        #     os.mkdir(filepath)
         filepath += '/users.dat'
-        # if not os.path.isfile(filepath):
-        #     userName = 'admin'
-        #     userPassword = '123456'
-        #     userFile = open(filepath, 'wb')
-        #     infoToWrite = userName + '\n' + userPassword + '\n'
-        #     infoToWrite = func_encrypt_config(key, infoToWrite)
-        #     userFile.write(infoToWrite.encode('utf-8'))
-        #     userFile.flush()
-        #     userFile.close()
-        # else:
         userInput_Name = self.ui.userNameEdit.text()
         userInput_Password = self.ui.passwordEdit.text()
         userFile = open(filepath, 'rb')
@@ -113,10 +96,12 @@ class Controller:
 
     def show_register(self):
         self.regisDialog = registerDialog()
+        self.regisDialog.setFixedSize(378, 440)
         self.regisDialog.show()
 
     def show_login(self):
         self.logDialog = loginDialog()
+        self.logDialog.setFixedSize(378, 440)
         self.logDialog.show()
 
 

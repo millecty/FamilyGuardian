@@ -1,46 +1,52 @@
 import sys
 import os
-
-# 文件加解密
-import base64
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+import re
+import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QDialog, QMessageBox, QLineEdit
 from PyQt5.QtCore import Qt
 from untitled import Ui_Dialog
 from newUser import Ui_Dialog as Ui_newUserDialog
 
+from utils.encryption import func_encrypt_config, func_decrypt_config
+from utils.lineEditValidator import LineEditValidator
+
 QtCore.QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 key = b'mysecretpassword'  # 密钥（需要确保安全）
 
-
-# 加密函数
-def func_encrypt_config(_key, plain_text):
-    cipher = AES.new(_key, AES.MODE_CBC)
-    ciphertext = cipher.encrypt(pad(plain_text.encode(), AES.block_size))
-    iv = base64.b64encode(cipher.iv).decode()
-    encrypted_text = base64.b64encode(ciphertext).decode()
-    return iv + encrypted_text
-
-
-# 解密函数
-def func_decrypt_config(_key, encrypted_text):
-    iv = base64.b64decode(encrypted_text[:24])
-    ciphertext = base64.b64decode(encrypted_text[24:])
-    cipher = AES.new(_key, AES.MODE_CBC, iv)
-    decrypted_text = unpad(cipher.decrypt(ciphertext), AES.block_size).decode()
-    return decrypted_text
-
-
 class registerDialog(QDialog):
     ui = Ui_newUserDialog()
+    userNameValidator = LineEditValidator(
+        fullPatterns=r'^[a-zA-Z0-9]{6,12}$',
+        partialPatterns=r'^[\u4e00-\u9fa5a-zA-Z0-9]{1,12}$',
+        fixupString='请输入英文字母和数字组成的6-12位用户名'
+    )
+    userPasswordValidator = LineEditValidator(
+        fullPatterns=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$',
+        partialPatterns=r'^[^]{1,16}$',
+        fixupString=None
+    )
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui.setupUi(self)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        self.ui.regisMiniButton.clicked.connect(self.showMinimized)
+        self.ui.regisCloseButton.clicked.connect(self.close)
+        self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
+        self.ui.passwordConfirmEdit.setEchoMode(QLineEdit.Password)
+        self.ui.registerButton.clicked.connect(self.register)
 
+    def register(self):
+        msgBox = QMessageBox()
+        msgBox.setText('注册成功!\n即将转到登陆界面...')
+        timer = QTimer()
+        timer.timeout.connect(msgBox.close)
+        timer.start(3000)
+        msgBox.exec_()
+        self.close()
 
 class loginDialog(QDialog):
     ui = Ui_Dialog()
@@ -91,13 +97,12 @@ class Controller:
         # 如果没有用户账户文件，打开注册界面
         if not os.path.isfile(filepath):
             self.show_register()
-        else:
-            self.show_login()
+        self.show_login()
 
     def show_register(self):
         self.regisDialog = registerDialog()
         self.regisDialog.setFixedSize(378, 440)
-        self.regisDialog.show()
+        self.regisDialog.exec_()
 
     def show_login(self):
         self.logDialog = loginDialog()
@@ -109,4 +114,5 @@ class Controller:
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     controller = Controller()
+    # controller.show_login()
     sys.exit(app.exec_())

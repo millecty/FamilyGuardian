@@ -6,14 +6,23 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>378</width>
+    <width>446</width>
     <height>440</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
@@ -71,7 +80,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="loginMiniButton">
+       <widget class="QPushButton" name="regisMiniButton">
         <property name="minimumSize">
          <size>
           <width>50</width>
@@ -87,7 +96,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="loginCloseButton">
+       <widget class="QPushButton" name="regisCloseButton">
         <property name="minimumSize">
          <size>
           <width>50</width>

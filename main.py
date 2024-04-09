@@ -23,13 +23,13 @@ class registerDialog(QDialog):
     userNameValidator = LineEditValidator(
         fullPatterns=[r'^[a-zA-Z0-9]{6,12}$'],
         partialPatterns=[r'^[a-zA-Z0-9]{1,12}$'],
-        fixupString='请输入英文字母和数字组成的6-12位用户名'
+        fixupString='what'
         # fixupString=None
     )
     userPasswordValidator = LineEditValidator(
-        fullPatterns=[r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$'],
-        partialPatterns=[r'^[^]{1,16}$'],
-        fixupString=None
+        fullPatterns=[r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z0-9]{8,16}$'],
+        partialPatterns=[r'^[a-zA-Z0-9]{1,16}$'],
+        fixupString=''
     )
 
     def __init__(self, parent=None):
@@ -47,6 +47,7 @@ class registerDialog(QDialog):
         self.ui.passwordConfirmEdit.installEventFilter(self.userPasswordValidator)
         self.ui.passwordConfirmEdit.setEchoMode(QLineEdit.Password)
         self.ui.registerButton.clicked.connect(self.register)
+        QMessageBox.information(self, '', '首次登录，请先创建用户!')
 
     def register(self):
         userInput_Name = self.ui.userNameEdit.text()
@@ -72,6 +73,10 @@ class registerDialog(QDialog):
         timer.start(3000)
         msgBox.exec_()
         self.close()
+
+    # def checkUserName(self):
+    #     userName = self.ui.userNameEdit.text()
+    #     if()
 
 class loginDialog(QDialog):
     ui = Ui_Dialog()
@@ -126,6 +131,7 @@ class Controller:
     def __init__(self):
         if not os.path.exists('data'):
             os.mkdir('data')
+        if not os.path.exists('data/userInfo'):
             os.mkdir('data/userInfo')
         filepath = 'data/userInfo/users.dat'
         # 如果没有用户账户文件，打开注册界面

@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui, Qt
 import re
+from PyQt5.QtWidgets import QMessageBox
 
 class LineEditValidator(QtGui.QValidator):
     def __init__(
@@ -101,4 +102,5 @@ class LineEditValidator(QtGui.QValidator):
             return string
         else:
             return self.fixupString
+            # return ''
 

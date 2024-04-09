@@ -33,16 +33,25 @@ def func_decrypt_config(_key, encrypted_text):
     return decrypted_text
 
 
+class registerDialog(QDialog):
+    ui = Ui_newUserDialog()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.ui.setupUi(self)
+
+
 class loginDialog(QDialog):
     ui = Ui_Dialog()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui.setupUi(self)
-        self.newUserUi.setupUi(self)
-        
-        if not os.path.exists('data'):
-            os.mkdir('data')
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.newUserUi.setupUi(self)
+
+        # if not os.path.exists('data'):
+        #     os.mkdir('data')
         # self.clearFocus()
         # self.ui.userNameEdit.setFocus()
         self.ui.loginButton.clicked.connect(self.check)
@@ -89,14 +98,30 @@ class loginDialog(QDialog):
         return False
 
 
+class Controller:
+    # 放在
+    def __init__(self):
+        if not os.path.exists('data'):
+            os.mkdir('data')
+            os.mkdir('data/userInfo')
+        filepath = 'data/userInfo/users.dat'
+        # 如果没有用户账户文件，打开注册界面
+        if not os.path.isfile(filepath):
+            self.show_register()
+        else:
+            self.show_login()
+
+    def show_register(self):
+        self.regisDialog = registerDialog()
+        self.regisDialog.show()
+
+    def show_login(self):
+        self.logDialog = loginDialog()
+        self.logDialog.show()
+
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    login = loginDialog()
-    login.setWindowFlag(Qt.FramelessWindowHint)
-    login.show()
-    # dialog = QDialog()
-    # dialog.setWindowFlag(Qt.FramelessWindowHint)      # 去除标题栏
-    # ui = Ui_Dialog()
-    # ui.setupUi(dialog)
-    # dialog.show()
+    controller = Controller()
     sys.exit(app.exec_())

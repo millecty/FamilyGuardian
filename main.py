@@ -15,17 +15,20 @@ from utils.lineEditValidator import LineEditValidator
 
 QtCore.QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 key = b'mysecretpassword'  # 密钥（需要确保安全）
+filepath = 'data/userInfo/users.dat'
+
 
 class registerDialog(QDialog):
     ui = Ui_newUserDialog()
     userNameValidator = LineEditValidator(
-        fullPatterns=r'^[a-zA-Z0-9]{6,12}$',
-        partialPatterns=r'^[\u4e00-\u9fa5a-zA-Z0-9]{1,12}$',
+        fullPatterns=[r'^[a-zA-Z0-9]{6,12}$'],
+        partialPatterns=[r'^[a-zA-Z0-9]{1,12}$'],
         fixupString='请输入英文字母和数字组成的6-12位用户名'
+        # fixupString=None
     )
     userPasswordValidator = LineEditValidator(
-        fullPatterns=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$',
-        partialPatterns=r'^[^]{1,16}$',
+        fullPatterns=[r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$'],
+        partialPatterns=[r'^[^]{1,16}$'],
         fixupString=None
     )
 
@@ -34,12 +37,34 @@ class registerDialog(QDialog):
         self.ui.setupUi(self)
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.ui.regisMiniButton.clicked.connect(self.showMinimized)
-        self.ui.regisCloseButton.clicked.connect(self.close)
+        self.ui.regisCloseButton.clicked.connect(self.close)    # 这里要设置让后面的东西别出来了
+        self.ui.userNameEdit.setValidator(self.userNameValidator)
+        self.ui.userNameEdit.installEventFilter(self.userNameValidator)
         self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
+        self.ui.passwordEdit.setValidator(self.userPasswordValidator)
+        self.ui.passwordEdit.installEventFilter(self.userPasswordValidator)
+        self.ui.passwordConfirmEdit.setValidator(self.userPasswordValidator)
+        self.ui.passwordConfirmEdit.installEventFilter(self.userPasswordValidator)
         self.ui.passwordConfirmEdit.setEchoMode(QLineEdit.Password)
         self.ui.registerButton.clicked.connect(self.register)
 
     def register(self):
+        userInput_Name = self.ui.userNameEdit.text()
+        userInput_Password = self.ui.passwordEdit.text()
+        userInput_PasswordConfirm = self.ui.passwordConfirmEdit.text()
+        if userInput_Password != userInput_PasswordConfirm:
+            QMessageBox.information(self, '', '两次输入的密码不一致!')
+            self.ui.passwordEdit.clear()
+            self.ui.passwordConfirmEdit.clear()
+            self.ui.passwordEdit.setFocus()
+            return
+        userFile = open(filepath, 'wb')
+        userInfo = userInput_Name + '\n' + userInput_Password
+        userInfo = func_encrypt_config(key, userInfo)
+        userFile.write(userInfo.encode('utf-8'))
+        userFile.flush()
+        userFile.close()
+        # 注册成功
         msgBox = QMessageBox()
         msgBox.setText('注册成功!\n即将转到登陆界面...')
         timer = QTimer()
@@ -61,20 +86,25 @@ class loginDialog(QDialog):
         self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
 
     def check(self):
-        filepath = 'data/userInfo'
-        filepath += '/users.dat'
         userInput_Name = self.ui.userNameEdit.text()
         userInput_Password = self.ui.passwordEdit.text()
         userFile = open(filepath, 'rb')
         userInfo = userFile.read().decode('utf-8')
         userFile.close()
         userInfo = func_decrypt_config(key, userInfo)
-        if self.check_credentials(userInfo, userInput_Name, userInput_Password):
+        if self.check_credentials(userInfo, userInput_Name, userInput_Password) == 1:
             print('登录成功!')
             QMessageBox.information(self, 'Congratulation!', '登陆成功!')
-        else:
-            print('登录失败!')
-            QMessageBox.information(self, 'Pity!', '登陆失败!')
+        elif self.check_credentials(userInfo, userInput_Name, userInput_Password) == 2:
+            print('密码错误!')
+            self.ui.passwordEdit.clear()
+            QMessageBox.information(self, '', '密码错误!')
+        elif self.check_credentials(userInfo, userInput_Name, userInput_Password) == 3:
+            print('账号错误!')
+            self.ui.userNameEdit.clear()
+            self.ui.passwordEdit.clear()
+            self.ui.userNameEdit.setFocus()
+            QMessageBox.information(self, '', '账号错误!')
 
     def check_credentials(self, userinfo, userinput_name, userinput_password):
         lines = userinfo.splitlines()
@@ -82,9 +112,13 @@ class loginDialog(QDialog):
         if len(lines) % 2 != 0:
             raise SystemExit('UserFileError!')
         for i in userNum:
-            if lines[i] == userinput_name and lines[i + 1] == userinput_password:
-                return True
-        return False
+            if lines[i] == userinput_name and lines[i + 1] == userinput_password:       # 匹配成功
+                return 1
+            elif lines[i] == userinput_name and lines[i + 1] != userinput_password:     # 密码错误
+                return 2
+            else:                                                                       # 账号错误
+                return 3
+        return 0
 
 
 class Controller:

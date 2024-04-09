@@ -19,11 +19,11 @@ content = 'admin\n123456\n'
 content = func_encrypt_config(key, content)
 
 
-filepath = 'data/userInfo'
+filepath = '../data/userInfo'
 if not os.path.exists(filepath):
     os.mkdir(filepath)
 
-filepath += '/user.dat'
+filepath += '/users.dat'
 if not os.path.isfile(filepath):
     userFile = open(filepath, 'wb')
     # userFile.write('admin\n'.encode('utf-8'))

@@ -1,17 +1,53 @@
 from PyQt5 import QtWidgets, QtCore, QtGui, Qt
 import re
 
-class LineEditValidator(QtGui.QValidator):
+
+############## QLineEdit正则表达式输入验证器
+class LineEditRegExpValidator(QtGui.QValidator):
+    '''
+    # 默认为科学计数法输入验证器
+
+    用法
+    SciNotValidator = LineEditRegExpValidator() # 创建一个QLineEdit正则表达式输入验证器的类，默认为科学计数法输入验证器
+
+    self.LineEdit1.setValidator(SciNotValidator) # 设置验证器（启用）
+    self.LineEdit1.installEventFilter(SciNotValidator) # QLineEdit清空内容且游标失焦时，自动填充上一次的字符串内容
+
+    self.LineEdit2.setValidator(SciNotValidator)
+    self.LineEdit2.installEventFilter(SciNotValidator)
+
+    self.LineEdit3.setValidator(SciNotValidator)
+    self.LineEdit3.installEventFilter(SciNotValidator)
+
+    Validator.validate() is abstract and must be overriddenValidator.validate() is abstract and must be overridden
+    '''
+
     def __init__(
             self,
+
             # 编辑状态框输入结束允许的字符串
-            fullPatterns,
+            fullPatterns=[
+                r"[+|-]?[0-9]+\.?[0-9]*(?:[Ee][+|-]?[0-9]+)?",
+                r'[+|-]{0,1}nan', r'[+|-]{0,1}inf'
+            ],
+
             # 编辑状态框输入尚未结束允许的字符串
-            partialPatterns,
-            fixupString
+            partialPatterns=[
+                r'[+|-]?[0-9]+\.?[0-9]*(?:[Ee][+|-]?)?',
+                r'-',
+                r'\+',
+                r'[+|-]{0,1}nan',
+                r'[+|-]{0,1}na',
+                r'[+|-]{0,1}n',
+                r'[+|-]{0,1}inf',
+                r'[+|-]{0,1}in',
+                r'[+|-]{0,1}i'
+            ],
+
+            fixupString='1.0'
     ):
 
-        super(LineEditValidator, self).__init__()
+        super(LineEditRegExpValidator, self).__init__()
         self.fullPatterns = fullPatterns
         self.partialPatterns = partialPatterns
         self.fixupString = fixupString
@@ -65,6 +101,12 @@ class LineEditValidator(QtGui.QValidator):
         # FocusIn event
         # 每当fous in时，更新LineEditRegExpValidator的fixupString
         # 输入验证器
+        '''
+        SciNotValidator = LineEditRegExpValidator()
+
+        self.LineEdit1.setValidator(SciNotValidator)
+        self.LineEdit1.installEventFilter(SciNotValidator)
+        '''
 
         if event.type() == QtCore.QEvent.FocusIn:
             # do custom stuff
@@ -101,4 +143,3 @@ class LineEditValidator(QtGui.QValidator):
             return string
         else:
             return self.fixupString
-

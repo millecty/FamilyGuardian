@@ -10,6 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QDialog, QMessageBox, QLineEdit
 from PyQt5.QtCore import Qt
 from untitled import Ui_Dialog
+from newUser import Ui_Dialog as Ui_newUserDialog
 
 key = b'mysecretpassword'  # 密钥（需要确保安全）
 
@@ -33,13 +34,13 @@ def func_decrypt_config(_key, encrypted_text):
 
 
 class loginDialog(QDialog):
-    # messageBox = QMessageBox()
     ui = Ui_Dialog()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui.setupUi(self)
-
+        self.newUserUi.setupUi(self)
+        
         if not os.path.exists('data'):
             os.mkdir('data')
         # self.clearFocus()
@@ -48,10 +49,6 @@ class loginDialog(QDialog):
         self.ui.loginMiniButton.clicked.connect(self.showMinimized)
         self.ui.loginCloseButton.clicked.connect(self.close)
         self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
-
-
-    def really(self):
-        QMessageBox.information(self, 'ha', 'he')
 
     def check(self):
         filepath = 'data/userInfo'

@@ -19,6 +19,7 @@ filepath = 'data/userInfo/users.dat'
 
 
 class registerDialog(QDialog):
+    abnormalExit = False        # 用于给程序知道是非正常退出，可以不用展示后面的界面
     ui = Ui_newUserDialog()
     userNameValidator = LineEditValidator(
         fullPatterns=['', r'^[a-zA-Z0-9]{6,12}$'],
@@ -36,7 +37,8 @@ class registerDialog(QDialog):
         self.ui.setupUi(self)
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.ui.regisMiniButton.clicked.connect(self.showMinimized)
-        self.ui.regisCloseButton.clicked.connect(QApplication.instance().quit)  # 这里要设置让后面的东西别出来了
+        # self.ui.regisCloseButton.clicked.connect(QApplication.instance().quit)  # 这里要设置让后面的东西别出来了
+        self.ui.regisCloseButton.clicked.connect(self.reject)  # 这里要设置让后面的东西别出来了
         self.ui.userNameEdit.setValidator(self.userNameValidator)
         self.ui.userNameEdit.installEventFilter(self.userNameValidator)
         self.ui.userNameEdit.setPlaceholderText('6-12个英文/数字组合')
@@ -78,8 +80,11 @@ class registerDialog(QDialog):
         timer.timeout.connect(msgBox.close)
         timer.start(3000)
         msgBox.exec_()
-        self.close()
+        self.accept()
 
+    # def closeAct(self):
+    #     self.abnormalExit = True
+    #     self.close()
 
 class loginDialog(QDialog):
     ui = Ui_Dialog()
@@ -90,7 +95,8 @@ class loginDialog(QDialog):
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.ui.loginButton.clicked.connect(self.check)
         self.ui.loginMiniButton.clicked.connect(self.showMinimized)
-        self.ui.loginCloseButton.clicked.connect(QApplication.instance().quit)
+        self.ui.loginCloseButton.clicked.connect(self.reject)
+        # self.ui.loginCloseButton.clicked.connect(self.close)
         self.ui.passwordEdit.setEchoMode(QLineEdit.Password)
 
     def check(self):
@@ -139,22 +145,26 @@ class Controller:
         filepath = 'data/userInfo/users.dat'
         # 如果没有用户账户文件，打开注册界面
         if not os.path.isfile(filepath):
-            self.show_register()
-        self.show_login()
+            if self.show_register() == QDialog.Rejected:
+                sys.exit(0)
+        if self.show_login() == QDialog.Accepted:
+            sys.exit(0)
+        else:
+            sys.exit(0)
 
     def show_register(self):
         self.regisDialog = registerDialog()
         self.regisDialog.setFixedSize(378, 440)
-        self.regisDialog.exec_()
+        return self.regisDialog.exec_()
 
     def show_login(self):
         self.logDialog = loginDialog()
         self.logDialog.setFixedSize(378, 440)
-        self.logDialog.show()
+        return self.logDialog.exec_()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     controller = Controller()
-    # controller.show_login()
+    print('等待结束')
     sys.exit(app.exec_())

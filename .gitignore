@@ -1,0 +1,10 @@
+*.jpg
+*.jpeg
+dealtxt.py
+export.py
+fsp.py
+predictimg.py
+*.mp4
+*.spec
+*.xml
+detect_results/
